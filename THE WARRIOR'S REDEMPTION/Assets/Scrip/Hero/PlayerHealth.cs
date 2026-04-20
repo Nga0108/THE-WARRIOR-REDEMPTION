@@ -1,99 +1,132 @@
 ﻿using UnityEngine;
+using System.Collections;
 using UnityEngine.UI;
-using UnityEngine.InputSystem;
 
 public class PlayerHealth : MonoBehaviour
 {
-    [Header("Thông số máu")]
+    [Header("Chỉ số máu")]
     public float maxHealth = 100f;
     public float currentHealth;
+    public Image healthBarFill;
 
-    [Header("Cấu hình UI")]
-    public Slider healthSlider;
-    public float lerpSpeed = 15f;
+    [Header("Hệ thống Nộ (Rage)")]
+    public Image rageBarFill;
+    public float currentRage = 0f;
+    public float maxRage = 100f;
+
+    [Header("Hiệu ứng Phát sáng")]
+    public float glowSpeed = 5f;
+    [ColorUsage(true, true)] public Color glowColor = Color.white;
+    private Color originalRageColor;
+
+    [Header("Trạng thái")]
+    public bool isDead = false;
+    public bool isHurting = false;
+    public bool isInvincible = false;
+    [Tooltip("1 = Nhận 100%, 0.6 = Nhận 60% (Giảm 40%)")]
+    public float damageReduction = 1f;
 
     private Animator anim;
-    private bool isDead = false;
+    private Rigidbody2D rb;
 
     void Start()
     {
-        anim = GetComponent<Animator>();
         currentHealth = maxHealth;
+        anim = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+        if (rageBarFill != null) originalRageColor = rageBarFill.color;
 
-        if (healthSlider != null)
-        {
-            healthSlider.maxValue = maxHealth;
-            healthSlider.value = maxHealth;
-            // Tắt Whole Numbers để thanh máu trượt mượt
-            healthSlider.wholeNumbers = false;
-        }
+        UpdateHealthUI();
+        UpdateRageUI();
     }
 
     void Update()
     {
+        HandleRageGlow();
+    }
+
+    public void AddRage(float amount)
+    {
         if (isDead) return;
+        currentRage = Mathf.Clamp(currentRage + amount, 0, maxRage);
+        UpdateRageUI();
+    }
 
-        // Cập nhật thanh máu trượt mượt theo thời gian
-        if (healthSlider != null && !Mathf.Approximately(healthSlider.value, currentHealth))
+    public void UpdateRageUI()
+    {
+        if (rageBarFill != null)
+            rageBarFill.fillAmount = currentRage / maxRage;
+    }
+
+    private void HandleRageGlow()
+    {
+        if (rageBarFill == null) return;
+        if (currentRage >= maxRage)
         {
-            healthSlider.value = Mathf.Lerp(healthSlider.value, currentHealth, lerpSpeed * Time.deltaTime);
+            float emission = 0.5f + Mathf.PingPong(Time.time * glowSpeed, 1.0f);
+            rageBarFill.color = glowColor * emission;
+            rageBarFill.rectTransform.localScale = Vector3.one * (1f + (emission - 0.5f) * 0.08f);
         }
-
-        // TEST: Nhấn phím T để tự trừ máu (Sử dụng Input System mới)
-        if (Keyboard.current != null && Keyboard.current.tKey.wasPressedThisFrame)
+        else
         {
-            TakeDamage(20);
+            rageBarFill.color = originalRageColor;
+            rageBarFill.rectTransform.localScale = Vector3.one;
         }
     }
 
     public void TakeDamage(float damage)
     {
-        if (isDead) return;
+        if (isDead || isHurting || isInvincible) return;
 
-        currentHealth -= damage;
+        // Áp dụng giảm sát thương 40% nếu đang dùng bình buff Defense
+        float finalDamage = damage * damageReduction;
+
+        currentHealth -= finalDamage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        UpdateHealthUI();
 
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
+        if (currentHealth <= 0) PlayerDie();
+        else StartCoroutine(HurtingRoutine());
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    public void UpdateHealthUI()
     {
-        // Đảm bảo quái của bạn có Tag là "Enemy"
-        if (collision.gameObject.CompareTag("Enemy"))
-        {
-            TakeDamage(10); // Bị quái chạm vào mất 10 máu
-        }
+        if (healthBarFill != null)
+            healthBarFill.fillAmount = currentHealth / maxHealth;
     }
 
-    void Die()
+    void PlayerDie()
     {
+        if (isDead) return;
         isDead = true;
-        Debug.Log("Player Die!");
+        anim.SetTrigger("Die");
 
-        // 1. Chạy Animation chết
+        // Thêm logic gọi Popup ở đây:
+        ItemManager items = GetComponent<ItemManager>();
+        if (items != null && PopupManager.Instance != null)
+        {
+            // Truyền số vàng và ore hiện tại vào bảng Defeat
+            PopupManager.Instance.ShowDefeat(items.goldSlot.count, items.oreSlot.count);
+        }
+
+        rb.linearVelocity = Vector2.zero;
+        rb.bodyType = RigidbodyType2D.Static;
+        GetComponent<PlayerMovement>().enabled = false;
+    }
+
+    private IEnumerator HurtingRoutine()
+    {
+        isHurting = true;
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+
         if (anim != null)
         {
-            anim.SetTrigger("Die"); // Tên "Die" phải khớp với Animator của bạn
+            anim.ResetTrigger("hurt");
+            anim.SetTrigger("hurt");
         }
 
-        // 2. Ép thanh máu về 0 ngay lập tức, không chờ Lerp
-        if (healthSlider != null) healthSlider.value = 0;
-
-        // 3. Vô hiệu hóa di chuyển để xác không chạy được
-        if (GetComponent<PlayerMovement>() != null)
-        {
-            GetComponent<PlayerMovement>().enabled = false;
-        }
-
-        // 4. Dừng vật lý để không bị đẩy bởi quái
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector2.zero;
-            // rb.simulated = false; // Mở dòng này nếu muốn xác xuyên thấu
-        }
+        yield return new WaitForSeconds(0.2f);
+        isHurting = false;
+        if (anim != null) anim.ResetTrigger("hurt");
     }
 }
