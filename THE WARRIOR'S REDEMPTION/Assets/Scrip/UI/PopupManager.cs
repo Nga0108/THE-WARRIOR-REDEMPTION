@@ -109,26 +109,21 @@ public class PopupManager : MonoBehaviour
         if (nextIndex < SceneManager.sceneCountInBuildSettings)
             SceneManager.LoadScene(nextIndex);
     }
-
-    // Trong PopupManager.cs, tại hàm BackToMainMenu hoặc NextLevelButton
-
-    // Trong PopupManager.cs
+   
     public void BackToMainMenu()
     {
-        // Tìm ItemManager để lấy số vàng đang nhặt được trong màn này
+        
         ItemManager items = FindFirstObjectByType<ItemManager>();
 
         if (items != null)
         {
-            // Gọi DataManager để thực hiện cộng dồn
+            
             if (DataManager.Instance != null)
             {
                 DataManager.Instance.SaveGame(items.goldSlot.count, items.oreSlot.count);
             }
             else
             {
-                // Trường hợp chưa có Instance (nếu bạn không dùng DontDestroyOnLoad)
-                // Ta có thể dùng tạm cách này:
                 int currentGold = PlayerPrefs.GetInt("SavedGold", 0) + items.goldSlot.count;
                 PlayerPrefs.SetInt("SavedGold", currentGold);
                 PlayerPrefs.Save();
@@ -144,7 +139,6 @@ public class PopupManager : MonoBehaviour
         if (settingsPopup) settingsPopup.SetActive(true);
         if (pausePopup) pausePopup.SetActive(false);
     }
-
 
     public void OpenInventory()
     {

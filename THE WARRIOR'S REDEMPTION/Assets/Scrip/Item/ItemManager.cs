@@ -38,6 +38,11 @@ public class ItemManager : MonoBehaviour
     {
         playerHealth = GetComponent<PlayerHealth>();
         playerMovement = GetComponent<PlayerMovement>();
+
+        hpSlot.count = PlayerPrefs.GetInt("Owned_HP", 0);
+        damageSlot.count = PlayerPrefs.GetInt("Owned_Damage", 0);
+        defenseSlot.count = PlayerPrefs.GetInt("Owned_Defense", 0);
+
         UpdateInventoryUI();
     }
 

@@ -35,24 +35,20 @@ public class TopDownMovement : MonoBehaviour
 
         moveInput = input.normalized;
 
-        // Xử lý lật mặt (Flip)
         if (moveInput.x > 0) transform.localScale = new Vector3(1, 1, 1);
         else if (moveInput.x < 0) transform.localScale = new Vector3(-1, 1, 1);
 
-        // Cập nhật Animator
         if (anim != null)
         {
-            // magnitude trả về 1 nếu di chuyển, 0 nếu đứng yên
+            
             anim.SetFloat("InputX", moveInput.magnitude);
         }
     }
 
-    // CHỈ GIỮ LẠI MỘT HÀM FIXEDUPDATE DUY NHẤT NÀY
     void FixedUpdate()
     {
         if (rb != null)
         {
-            // Trong Unity 6, dùng linearVelocity thay cho velocity
             rb.linearVelocity = moveInput * moveSpeed;
         }
     }

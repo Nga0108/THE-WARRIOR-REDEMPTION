@@ -126,7 +126,6 @@ public class BossController : MonoBehaviour
         }
     }
 
-   
     public void TakeDamage(float dmg, PlayerHealth player)
     {
         if (isDead) return;
@@ -134,7 +133,6 @@ public class BossController : MonoBehaviour
         currentHealth -= dmg;
         if (healthSlider != null) healthSlider.value = currentHealth;
 
-        
         if (player != null)
         {
             player.AddRage(8f);
@@ -181,8 +179,6 @@ public class BossController : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
     }
-
-  
 
     public void PerformSpecialDamage()
     {

@@ -35,7 +35,6 @@ public class MenuManager : MonoBehaviour
         SceneManager.LoadScene(currentSceneName);
     }
 
- 
     public void QuitGame()
     {
         Application.Quit();

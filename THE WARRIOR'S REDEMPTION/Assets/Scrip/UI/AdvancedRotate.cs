@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections; // Thư viện bắt buộc để dùng IEnumerator
+using System.Collections;
 
 public class AdvancedRotate : MonoBehaviour
 {
@@ -22,7 +22,7 @@ public class AdvancedRotate : MonoBehaviour
 
     void Awake()
     {
-        // Lưu lại kích thước gốc trước khi bắt đầu hiệu ứng ScaleUp
+       
         baseScale = transform.localScale;
         sr = GetComponent<SpriteRenderer>();
         if (sr != null) baseAlpha = sr.color.a;
@@ -30,25 +30,25 @@ public class AdvancedRotate : MonoBehaviour
 
     void OnEnable()
     {
-        // Khi cổng được bật lên, bắt đầu hiệu ứng to dần
+        
         transform.localScale = Vector3.zero;
         StartCoroutine(ScaleUp());
     }
 
     void Update()
     {
-        // 1. Logic Xoay tròn
+        
         float direction = clockwise ? -1f : 1f;
         transform.Rotate(0, 0, direction * rotateSpeed * Time.deltaTime);
 
-        // 2. Logic Co giãn (Pulse)
+        
         if (usePulse)
         {
             float scaleMod = Mathf.Sin(Time.time * pulseSpeed) * pulseAmount;
             transform.localScale = baseScale + new Vector3(scaleMod, scaleMod, 0);
         }
 
-        // 3. Logic Nhấp nháy (Flicker)
+        
         if (useFlicker && sr != null)
         {
             float alphaMod = Mathf.PingPong(Time.time * flickerSpeed, baseAlpha * 0.5f);
@@ -58,13 +58,13 @@ public class AdvancedRotate : MonoBehaviour
         }
     }
 
-    // Coroutine giúp cổng nở ra từ từ khi xuất hiện
+   
     IEnumerator ScaleUp()
     {
         float t = 0;
         while (t < 1)
         {
-            // Dùng unscaledDeltaTime để hiệu ứng vẫn mượt ngay cả khi game đang Slow-motion
+            
             t += Time.unscaledDeltaTime * 2f;
             transform.localScale = Vector3.Lerp(Vector3.zero, baseScale, t);
             yield return null;

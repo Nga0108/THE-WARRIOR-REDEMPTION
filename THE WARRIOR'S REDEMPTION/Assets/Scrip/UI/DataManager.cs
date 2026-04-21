@@ -14,8 +14,7 @@ public class DataManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            // Nếu bạn muốn DataManager tồn tại xuyên suốt các Scene, bỏ comment dòng dưới:
-            // DontDestroyOnLoad(gameObject); 
+            
         }
         else
         {
