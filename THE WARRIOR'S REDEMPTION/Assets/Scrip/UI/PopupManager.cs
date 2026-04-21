@@ -9,7 +9,10 @@ public class PopupManager : MonoBehaviour
     [Header("Cấu hình Panels")]
     public GameObject victoryPopup;
     public GameObject defeatPopup;
-    public GameObject pausePopup; // Thêm dòng này
+    public GameObject pausePopup;
+    public GameObject settingsPopup;
+    public GameObject pauseGoldGroup;
+    public GameObject pauseOreGroup;
 
     [Header("Text hiển thị Victory")]
     public TextMeshProUGUI victoryGoldText;
@@ -20,43 +23,63 @@ public class PopupManager : MonoBehaviour
     public TextMeshProUGUI defeatOreText;
 
     [Header("Text hiển thị Pause")]
-    public TextMeshProUGUI pauseGoldText; // Thêm dòng này để sửa lỗi CS0103
-    public TextMeshProUGUI pauseOreText;  // Thêm dòng này để sửa lỗi CS0103
+    public TextMeshProUGUI pauseGoldText;
+    public TextMeshProUGUI pauseOreText;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
-        // Tự động ẩn các popup khi vào màn
+        
         if (victoryPopup) victoryPopup.SetActive(false);
         if (defeatPopup) defeatPopup.SetActive(false);
         if (pausePopup) pausePopup.SetActive(false);
     }
 
-    // --- HÀM GỌI KHI TẠM DỪNG ---
     public void ShowPause()
     {
-        // Tìm ItemManager trên Player để lấy dữ liệu thực tế
+     
         ItemManager items = FindFirstObjectByType<ItemManager>();
+
         if (items != null)
         {
-            if (pauseGoldText) pauseGoldText.text = items.goldSlot.count.ToString();
-            if (pauseOreText) pauseOreText.text = items.oreSlot.count.ToString();
+         
+            if (items.goldSlot.count > 0)
+            {
+                pauseGoldGroup.SetActive(true);
+                if (pauseGoldText) pauseGoldText.text = items.goldSlot.count.ToString();
+            }
+            else
+            {
+                pauseGoldGroup.SetActive(false);
+            }
+
+         
+            if (items.oreSlot.count > 0)
+            {
+                pauseOreGroup.SetActive(true);
+                if (pauseOreText) pauseOreText.text = items.oreSlot.count.ToString();
+            }
+            else
+            {
+                pauseOreGroup.SetActive(false);
+            }
         }
 
         if (pausePopup) pausePopup.SetActive(true);
-        Time.timeScale = 0f; // Dừng game
+        if (settingsPopup) settingsPopup.SetActive(false);
+        Time.timeScale = 0f;
     }
 
-    // --- HÀM GỌI KHI TIẾP TỤC ---
-    public void ResumeButton()
+    public void ResumeGame()
     {
         if (pausePopup) pausePopup.SetActive(false);
-        Time.timeScale = 1f; // Chạy lại game
+        if (settingsPopup) settingsPopup.SetActive(false);
+
+        Time.timeScale = 1f; 
     }
 
-    // --- HÀM GỌI KHI CHIẾN THẮNG ---
     public void ShowVictory(int gold, int ore)
     {
         if (victoryGoldText) victoryGoldText.text = gold.ToString();
@@ -65,7 +88,6 @@ public class PopupManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    // --- HÀM GỌI KHI THẤT BẠI ---
     public void ShowDefeat(int gold, int ore)
     {
         if (defeatGoldText) defeatGoldText.text = gold.ToString();
@@ -88,21 +110,72 @@ public class PopupManager : MonoBehaviour
             SceneManager.LoadScene(nextIndex);
     }
 
-    // --- HÀM QUAY VỀ MÀN HÌNH CHÍNH ---
+    // Trong PopupManager.cs, tại hàm BackToMainMenu hoặc NextLevelButton
+
+    // Trong PopupManager.cs
     public void BackToMainMenu()
     {
-        // 1. Phải trả lại thời gian về 1 để Scene Menu không bị đóng băng
-        Time.timeScale = 1;
-        SceneManager.LoadScene("MainMenu");
+        // Tìm ItemManager để lấy số vàng đang nhặt được trong màn này
+        ItemManager items = FindFirstObjectByType<ItemManager>();
+
+        if (items != null)
+        {
+            // Gọi DataManager để thực hiện cộng dồn
+            if (DataManager.Instance != null)
+            {
+                DataManager.Instance.SaveGame(items.goldSlot.count, items.oreSlot.count);
+            }
+            else
+            {
+                // Trường hợp chưa có Instance (nếu bạn không dùng DontDestroyOnLoad)
+                // Ta có thể dùng tạm cách này:
+                int currentGold = PlayerPrefs.GetInt("SavedGold", 0) + items.goldSlot.count;
+                PlayerPrefs.SetInt("SavedGold", currentGold);
+                PlayerPrefs.Save();
+            }
+        }
+
+        Time.timeScale = 1f;
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Spawn");
     }
 
-    // --- HÀM THOÁT GAME ---
+    public void OpenSettings()
+    {
+        if (settingsPopup) settingsPopup.SetActive(true);
+        if (pausePopup) pausePopup.SetActive(false);
+    }
+
+
+    public void OpenInventory()
+    {
+        if (pausePopup) pausePopup.SetActive(true);
+        if (settingsPopup) settingsPopup.SetActive(false);
+    }
+
+    public void CloseSettings()
+    {
+        if (settingsPopup != null) settingsPopup.SetActive(false);
+    }
+
+  
+    public void SetMusicVolume(float value)
+    {
+      
+        Debug.Log("Âm lượng Nhạc: " + value);
+    }
+
+    
+    public void SetSFXVolume(float value)
+    {
+        Debug.Log("Âm lượng Hiệu ứng: " + value);
+    }
+
+  
     public void QuitButton()
     {
-        // Lệnh này sẽ đóng ứng dụng khi đã Build ra file .exe hoặc .apk
+   
         Application.Quit();
 
-        // Dòng này giúp bạn kiểm tra nút có hoạt động không khi đang chạy trong Unity Editor
 #if UNITY_EDITOR
     UnityEditor.EditorApplication.isPlaying = false;
 #endif

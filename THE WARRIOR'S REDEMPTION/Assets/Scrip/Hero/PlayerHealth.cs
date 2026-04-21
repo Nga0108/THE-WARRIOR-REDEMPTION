@@ -78,7 +78,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isDead || isHurting || isInvincible) return;
 
-        // Áp dụng giảm sát thương 40% nếu đang dùng bình buff Defense
+        // Áp dụng giảm sát thương 40%
         float finalDamage = damage * damageReduction;
 
         currentHealth -= finalDamage;
@@ -101,11 +101,10 @@ public class PlayerHealth : MonoBehaviour
         isDead = true;
         anim.SetTrigger("Die");
 
-        // Thêm logic gọi Popup ở đây:
         ItemManager items = GetComponent<ItemManager>();
         if (items != null && PopupManager.Instance != null)
         {
-            // Truyền số vàng và ore hiện tại vào bảng Defeat
+        
             PopupManager.Instance.ShowDefeat(items.goldSlot.count, items.oreSlot.count);
         }
 

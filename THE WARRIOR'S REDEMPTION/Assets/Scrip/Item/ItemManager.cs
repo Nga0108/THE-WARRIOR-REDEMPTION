@@ -27,9 +27,9 @@ public class ItemManager : MonoBehaviour
     public float boostDuration = 5f;
 
     [Header("Victory Popup UI")]
-    public GameObject victoryPopup;        // Kéo bảng VictoryPopup vào đây
-    public TextMeshProUGUI goldResultText; // Text hiện số vàng TRONG POPUP
-    public TextMeshProUGUI oreResultText;  // Text hiện số ore TRONG POPUP
+    public GameObject victoryPopup;        
+    public TextMeshProUGUI goldResultText;
+    public TextMeshProUGUI oreResultText;
 
     private PlayerHealth playerHealth;
     private PlayerMovement playerMovement;
@@ -50,11 +50,10 @@ public class ItemManager : MonoBehaviour
         if (Keyboard.current.digit6Key.wasPressedThisFrame) UseDefense();
     }
 
-    // --- HÀM CỘNG VẬT PHẨM (Gọi từ AutoCollect) ---
     public void AddGold(int amount)
     {
         goldSlot.count += amount;
-        // Thường vàng/ore ẩn nên không cần UpdateInventoryUI ở đây nếu chỉ hiện ở Popup
+       
     }
 
     public void AddOre(int amount)
@@ -65,15 +64,13 @@ public class ItemManager : MonoBehaviour
     public void AddHP(int amount)
     {
         hpSlot.count += amount;
-        UpdateInventoryUI(); // Cập nhật ngay lên HUD
+        UpdateInventoryUI();
     }
-
-    // --- HÀM XỬ LÝ POPUP ---
+   
     public void ShowVictoryPopup()
     {
         if (PopupManager.Instance != null)
         {
-            // Gửi dữ liệu vàng và ore sang Manager để hiển thị lên bảng Victory
             PopupManager.Instance.ShowVictory(goldSlot.count, oreSlot.count);
         }
     }
@@ -84,7 +81,6 @@ public class ItemManager : MonoBehaviour
         if (victoryPopup != null) victoryPopup.SetActive(false);
     }
 
-    // --- HÀM SỬ DỤNG VẬT PHẨM ---
     public void UseHP()
     {
         if (hpSlot.count > 0 && playerHealth.currentHealth < playerHealth.maxHealth)
@@ -96,8 +92,23 @@ public class ItemManager : MonoBehaviour
         }
     }
 
-    public void UseDamage() { if (damageSlot.count > 0) { damageSlot.count--; UpdateInventoryUI(); StartCoroutine(DamageBoostRoutine()); } }
-    public void UseDefense() { if (defenseSlot.count > 0) { defenseSlot.count--; UpdateInventoryUI(); StartCoroutine(DefenseBoostRoutine()); } }
+    public void UseDamage() 
+    { 
+        if (damageSlot.count > 0)
+        {   damageSlot.count--; 
+            UpdateInventoryUI(); 
+            StartCoroutine(DamageBoostRoutine());
+        } 
+    }
+    public void UseDefense()
+    { 
+        if (defenseSlot.count > 0) 
+        { 
+            defenseSlot.count--; 
+            UpdateInventoryUI();
+            StartCoroutine(DefenseBoostRoutine()); 
+        } 
+    }
 
     private IEnumerator DamageBoostRoutine()
     {

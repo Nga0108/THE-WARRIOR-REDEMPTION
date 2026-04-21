@@ -26,8 +26,6 @@ public class BossController : MonoBehaviour
     public LayerMask playerLayer;
 
     [Header("Hiệu ứng & UI")]
-    public GameObject warningPrefab;
-    private GameObject currentWarning;
     public Slider healthSlider;
 
     [Header("Cài đặt Portal")]
@@ -173,33 +171,18 @@ public class BossController : MonoBehaviour
 
     IEnumerator SpawnPortalSequence()
     {
-        // Đợi một khoảng thời gian cho Animation Die diễn ra (ví dụ 1.5 giây)
-        // Nếu bạn muốn làm chậm thời gian (Slow-motion), hãy chỉnh Time.timeScale ở đây
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(2.5f);
 
-        // Tạo cánh cổng tại vị trí Boss cộng thêm độ lệch Offset
         if (portalPrefab != null)
         {
             Instantiate(portalPrefab, transform.position + portalOffset, Quaternion.identity);
             Debug.Log("Cổng dịch chuyển đã xuất hiện!");
         }
 
-        // Có thể biến mất Boss sau khi cổng hiện ra
         yield return new WaitForSeconds(0.5f);
-        // Destroy(gameObject); // Hoặc SetActive(false) tùy logic game của bạn
     }
 
-    public void ShowWarning()
-    {
-        if (warningPrefab != null)
-        {
-            currentWarning = Instantiate(warningPrefab, transform.position, Quaternion.identity, transform);
-            currentWarning.transform.localPosition = new Vector3(0, -0.5f, 0);
-            currentWarning.transform.localScale = new Vector3(specialRange * 2, specialRange * 2, 1);
-        }
-    }
-
-    public void HideWarning() { if (currentWarning) Destroy(currentWarning); }
+  
 
     public void PerformSpecialDamage()
     {

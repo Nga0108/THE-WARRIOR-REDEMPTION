@@ -85,7 +85,7 @@ public class PlayerMovement : MonoBehaviour
         anim.SetBool("isGrounded", isGrounded);
     }
 
-    // Sửa lỗi Animation Event "ForceFinishHurt"
+   
     public void ForceFinishHurt()
     {
         if (playerHealth != null) playerHealth.isHurting = false;
@@ -183,15 +183,13 @@ public class PlayerMovement : MonoBehaviour
         {
             float finalDamage = attackDamage * damageMultiplier;
 
-            // Kiểm tra nếu là quái thường
             EnemyController enemy = target.GetComponent<EnemyController>();
             if (enemy != null)
             {
                 enemy.TakeDamage(finalDamage, this.playerHealth);
-                continue; // Đã xử lý xong đối tượng này
+                continue; 
             }
 
-            // THÊM ĐOẠN NÀY: Kiểm tra nếu là Boss
             BossController boss = target.GetComponent<BossController>();
             if (boss != null)
             {
@@ -218,7 +216,7 @@ public class PlayerMovement : MonoBehaviour
         if (col.gameObject.CompareTag("Ground")) { isGrounded = true; jumpCount = 0; }
     }
 
-    // Reset trạng thái khi rời mặt đất để tránh kẹt Jump
+
     private void OnCollisionExit2D(Collision2D col)
     {
         if (col.gameObject.CompareTag("Ground")) { isGrounded = false; }

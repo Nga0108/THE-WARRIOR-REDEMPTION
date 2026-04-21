@@ -11,6 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/GamePlay Scene/Map 1/Map 1.unity
     guid: 54c79771e9ffd2b40bf036541f363d82
+  - enabled: 1
+    path: Assets/Menu & Meta-game Scene/Spawn.unity
+    guid: 9ad409e369a1b574b85c20b0ce72396c
+  - enabled: 1
+    path: Assets/Menu & Meta-game Scene/Weapon.unity
+    guid: 7cfd766f7ef233e488b53fb823a9bb74
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 3590b91b4603b465dbb4216d601bff33, type: 3}
   m_UseUCBPForAssetBundles: 0
